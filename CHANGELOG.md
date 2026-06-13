@@ -8,6 +8,19 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-06-13
+
+Makes `bin/rails generate sasso:install` drop-in on a fresh Rails 8 app.
+
+### Fixed
+
+- The installer now removes the default `app/assets/stylesheets/application.css`,
+  which otherwise collides with the compiled `app/assets/builds/application.css`
+  on the asset load path (both resolve to the logical path `application.css`).
+- The installer repoints the Rails 8 default layout's `stylesheet_link_tag :app`
+  to `stylesheet_link_tag "application"` so the compiled CSS is actually linked
+  (no-op if the layout already links `"application"` or was customized).
+
 ## [0.1.0] - 2026-06-13
 
 Initial release. Requires the `sasso` gem **>= 0.1.1, < 1**.

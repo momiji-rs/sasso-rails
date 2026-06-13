@@ -30,14 +30,17 @@ bin/rails generate sasso:install
 ```
 
 The installer scaffolds `app/assets/stylesheets/application.scss`, creates
-`app/assets/builds/` (with a `.keep`), links the builds directory in a Sprockets
-manifest if one exists, and adds a watch process to `Procfile.dev`.
-
-Reference the compiled CSS in your layout:
+`app/assets/builds/` (with a `.keep`), removes the default
+`app/assets/stylesheets/application.css` (it would collide with the compiled
+output), links the builds directory in a Sprockets manifest if one exists, adds
+a watch process to `Procfile.dev`, and points your layout at the compiled CSS:
 
 ```erb
 <%= stylesheet_link_tag "application" %>
 ```
+
+(On Rails 8 the default layout links `:app`; the installer repoints it to
+`"application"`. If you wire the link yourself, use `"application"`.)
 
 ## Usage
 

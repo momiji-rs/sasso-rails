@@ -9,8 +9,31 @@ module Sasso
     class InstallGenerator < ::Rails::Generators::Base
       source_root File.expand_path("templates", __dir__)
 
+      # A fresh Propshaft/Sprockets app ships app/assets/stylesheets/application.css.
+      # Our compiled output is app/assets/builds/application.css — both resolve to
+      # the logical path "application.css" on the asset load path, which collides.
+      # The build dir owns the compiled CSS now (the cssbundling convention), so
+      # drop the default stub.
+      def remove_default_application_css
+        default = "app/assets/stylesheets/application.css"
+        remove_file default if File.exist?(File.join(destination_root, default))
+      end
+
       def create_stylesheet
         template "application.scss", "app/assets/stylesheets/application.scss"
+      end
+
+      # Rails 8 layouts default to `stylesheet_link_tag :app`, which looks for
+      # "app.css" and won't pick up our compiled "application.css". Point it at
+      # the entrypoint we build. No-op if the layout is missing or already links
+      # "application" (so a customized layout is left alone).
+      def link_stylesheet_in_layout
+        layout = "app/views/layouts/application.html.erb"
+        full = File.join(destination_root, layout)
+        return unless File.exist?(full)
+        return if File.read(full).include?('stylesheet_link_tag "application"')
+
+        gsub_file layout, /stylesheet_link_tag\s+:app\b/, 'stylesheet_link_tag "application"'
       end
 
       def ensure_builds_directory
