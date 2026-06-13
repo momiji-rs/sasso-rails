@@ -1,0 +1,13 @@
+// Entrypoint for sasso-rails. This file is compiled by `sasso:build` to
+// app/assets/builds/application.css, which the asset pipeline serves.
+//
+// Use @use to pull in partials (files named _name.scss) from this directory:
+//
+//   @use "components/buttons";
+//
+// Sibling partials resolve automatically; add extra include dirs via
+// config.sasso.load_paths in config/application.rb.
+
+body {
+  margin: 0;
+}

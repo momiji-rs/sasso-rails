@@ -1,0 +1,55 @@
+name: Release gem (RubyGems)
+
+# Pure-Ruby gem: no native extension, so NO cross-compile matrix — just build
+# the one source gem and push it via Trusted Publishing (OIDC — no API key
+# secret), on a version tag.
+#
+# ONE-TIME setup on rubygems.org BEFORE the first tag (gem doesn't exist yet —
+# register a *pending* publisher under Trusted Publishers):
+#   RubyGem: sasso-rails | Owner+Repo: momiji-rs/sasso-rails
+#   Workflow: release.yml | Environment: release
+# The gem name MUST be `sasso-rails` (the gem), not the repo path.
+# Also add a "release" environment in repo Settings → Environments.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'   # exact MAJOR.MINOR.PATCH (no prerelease suffix)
+
+permissions: {}
+
+jobs:
+  publish:
+    name: push to RubyGems (OIDC)
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write   # mint a short-lived RubyGems token via OIDC (no secret)
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          # No bundler-cache: this job only runs `gem build` + `gem push`, which
+          # need neither the dev bundle nor the Rails dependency graph.
+      - name: verify gem version == tag
+        run: |
+          v=$(ruby -Ilib -r sasso/rails/version -e 'print Sasso::Rails::VERSION')
+          if [ "v${v}" != "${GITHUB_REF_NAME}" ]; then
+            echo "lib/sasso/rails/version.rb (${v}) != tag (${GITHUB_REF_NAME})"; exit 1
+          fi
+      - name: build gem
+        run: |
+          v=$(ruby -Ilib -r sasso/rails/version -e 'print Sasso::Rails::VERSION')
+          mkdir -p pkg
+          gem build sasso-rails.gemspec -o "pkg/sasso-rails-${v}.gem"
+      # OIDC token exchange — no GEM_HOST_API_KEY secret.
+      # NB: this action publishes only `vMAJOR.MINOR.PATCH` tags (no moving @v1).
+      - uses: rubygems/configure-rubygems-credentials@v2.1.0
+      - name: gem push
+        run: |
+          v=$(ruby -Ilib -r sasso/rails/version -e 'print Sasso::Rails::VERSION')
+          gem push "pkg/sasso-rails-${v}.gem"
