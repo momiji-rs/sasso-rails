@@ -8,6 +8,22 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-06-14
+
+### Fixed
+
+- **Sprockets `assets:precompile` crash (`LoadError: cannot load such file --
+  sassc`).** On a Sprockets app (e.g. a default Rails 7.0 app), the install
+  generator left the manifest's default `//= link_directory ../stylesheets .css`
+  directive in place, so Sprockets 4 tried to COMPILE the `application.scss`
+  entrypoint with its built-in `SasscProcessor` (`require "sassc"`, not
+  installed) — harmless in dev but crashing `assets:precompile` on deploy. The
+  generator now neutralizes that directive (sasso owns the compiled output,
+  served from `../builds`, which is linked separately). Idempotent, and a no-op
+  on Propshaft (no manifest). Rails 7.0 + Sprockets now precompiles cleanly;
+  Propshaft (Rails 7.1 / 8.x) is unaffected. Verified end-to-end across both
+  pipelines, plus a generator unit test.
+
 ## [0.1.2] - 2026-06-14
 
 Requires the `sasso` gem **>= 0.2.0** (for its source-map API).

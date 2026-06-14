@@ -55,9 +55,24 @@ module Sasso
         manifest = "app/assets/config/manifest.js"
         full = File.join(destination_root, manifest)
         return unless File.exist?(full)
-        return if File.read(full).include?("link_tree ../builds")
 
-        append_to_file manifest, %(//= link_tree ../builds\n)
+        unless File.read(full).include?("link_tree ../builds")
+          append_to_file manifest, %(//= link_tree ../builds\n)
+        end
+
+        # The default Sprockets manifest links the stylesheets SOURCE directory
+        # (`//= link_directory ../stylesheets .css`). Sprockets 4 then tries to
+        # COMPILE our `application.scss` entrypoint with its built-in
+        # SasscProcessor, which `require "sassc"` — not installed on a default
+        # app — so `assets:precompile` crashes with
+        # `LoadError: cannot load such file -- sassc`. sasso owns the compiled
+        # output (served from ../builds, linked above), so the raw source dir
+        # must NOT be linked. Neutralize the directive — idempotent, since the
+        # regex only matches the live `//=` form (a re-run is a no-op).
+        gsub_file manifest,
+                  %r{^([ \t]*)//=([ \t]*link_directory[ \t]+\.\./stylesheets\b.*)$},
+                  "\\1//\\2  -- disabled by sasso-rails (sasso compiles ../stylesheets to ../builds; " \
+                  "linking the source dir makes Sprockets compile .scss via sassc)"
       end
 
       def add_watch_to_procfile
