@@ -94,8 +94,6 @@ that directory as a source of ready-to-serve assets:
 
 ## Notes & limitations
 
-- **Source maps are not supported yet.** The in-process compiler returns CSS
-  only; there is no `.css.map` output in any environment.
 - **`builds` is file-to-file.** Each entry maps one input file to one output
   file. There is no directory-glob form (no `"." => "."`); list each entrypoint
   explicitly.
@@ -109,6 +107,29 @@ that directory as a source of ready-to-serve assets:
   compress, so production output is `:compressed` there.
 - **Watch is a 1s mtime poll** (dependency-free, no native fs-events); it covers
   the source dir and `config.sasso.load_paths`.
+
+## Troubleshooting
+
+**`Bundler::GemNotFound: Could not find sasso-<version>-<platform>`** on
+`bin/rails sasso:build` (or any boot) right after `bundle install`. The `sasso`
+compiler ships as a **precompiled native gem**, so the lockfile must list your
+platform. If Bundler resolved the version but didn't materialize the native
+build for your arch, add the platform and re-install:
+
+```console
+$ bundle lock --add-platform arm64-darwin   # or x86_64-linux, aarch64-linux, etc.
+$ bundle install
+```
+
+This is a generic Bundler behaviour for precompiled native gems (the same step
+`nokogiri` etc. need on CI/Docker), not specific to sasso — but you may hit it
+on a first local install. To bake every supported platform into the lockfile up
+front:
+
+```console
+$ bundle lock --add-platform x86_64-linux aarch64-linux \
+    x86_64-linux-musl aarch64-linux-musl arm64-darwin x86_64-darwin x64-mingw-ucrt
+```
 
 ## Versioning
 
