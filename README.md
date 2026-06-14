@@ -72,6 +72,10 @@ config.sasso.style = :compressed
 # searched first, so sibling partials need no configuration.
 config.sasso.load_paths = [Rails.root.join("vendor/styles").to_s]
 
+# Source maps: write a <output>.map sidecar + sourceMappingURL footer.
+# Default: on outside production, off in production. Set true/false to force.
+config.sasso.source_map = nil
+
 # Defaults shown:
 config.sasso.source_dir = "app/assets/stylesheets"
 config.sasso.build_dir  = "app/assets/builds"

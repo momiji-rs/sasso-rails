@@ -8,7 +8,17 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
-## [0.1.1] - 2026-06-13
+## [0.1.2] - 2026-06-14
+
+Requires the `sasso` gem **>= 0.2.0** (for its source-map API).
+
+### Added
+
+- **Source maps.** `sasso:build` writes a `<output>.map` sidecar next to each
+  compiled CSS and appends the `sourceMappingURL` footer. Controlled by
+  `config.sasso.source_map` (default: on outside production, off in production);
+  the map's `sources` are rewritten relative to the builds directory and `file`
+  points at the built CSS.
 
 Makes `bin/rails generate sasso:install` drop-in on a fresh Rails 8 app.
 

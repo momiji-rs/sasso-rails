@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "fileutils"
+require "json"
+require "pathname"
 
 module Sasso
   module Rails
@@ -21,17 +23,18 @@ module Sasso
 
       ALLOWED_STYLES = %i[expanded compressed].freeze
 
-      attr_reader :root, :builds, :style, :load_paths, :source_dir, :build_dir
+      attr_reader :root, :builds, :style, :load_paths, :source_dir, :build_dir, :source_map
 
       def initialize(root:, builds:, style: :expanded, load_paths: [],
                      source_dir: "app/assets/stylesheets",
-                     build_dir: "app/assets/builds")
+                     build_dir: "app/assets/builds", source_map: false)
         @root       = File.expand_path(root.to_s)
         @builds     = normalize_builds(builds)
         @style      = normalize_style(style)
         @load_paths = Array(load_paths).map(&:to_s)
         @source_dir = source_dir.to_s
         @build_dir  = build_dir.to_s
+        @source_map = source_map ? true : false
       end
 
       # Compile every entrypoint; returns the list of written output paths.
@@ -47,13 +50,18 @@ module Sasso
           raise Error, "sasso-rails: input stylesheet not found: #{src}"
         end
 
-        # `Sasso.compile` already searches the entry file's own directory first
-        # (for sibling @use/@import); pass any extra include dirs after it.
-        css = ::Sasso.compile(src, style: @style, load_paths: @load_paths)
-
         dest = File.join(@root, @build_dir, output)
         FileUtils.mkdir_p(File.dirname(dest))
-        File.write(dest, css)
+
+        # `Sasso.compile` already searches the entry file's own directory first
+        # (for sibling @use/@import); pass any extra include dirs after it.
+        if @source_map
+          result = ::Sasso.compile(src, style: @style, load_paths: @load_paths, source_map: true)
+          write_source_map(dest, result.source_map)
+          File.write(dest, result.css + source_map_footer(File.basename(dest)))
+        else
+          File.write(dest, ::Sasso.compile(src, style: @style, load_paths: @load_paths))
+        end
         dest
       end
 
@@ -75,6 +83,33 @@ module Sasso
       end
 
       private
+
+      # Write the sidecar `<dest>.map`, pointing `file` at the built CSS and
+      # rewriting each source URL to a path relative to the builds directory
+      # (the .map lives next to the CSS). `source_map` is the parsed v3 Hash.
+      def write_source_map(dest, source_map)
+        from_dir = File.dirname(dest)
+        source_map["file"] = File.basename(dest)
+        source_map["sources"] = Array(source_map["sources"]).map { |s| relative_source(s, from_dir) }
+        File.write("#{dest}.map", JSON.generate(source_map))
+      end
+
+      # The `sourceMappingURL` footer for the built CSS. Matches dart-sass: the
+      # expanded footer sits on its own line after the trailing newline; the
+      # compressed footer is appended directly (no leading newline).
+      def source_map_footer(css_basename)
+        comment = "/*# sourceMappingURL=#{css_basename}.map */"
+        @style == :compressed ? "#{comment}\n" : "\n#{comment}\n"
+      end
+
+      # A source URL made relative to the .map's directory (so a DevTools that
+      # loads the .map resolves the original next to it). Falls back to the URL
+      # unchanged if it is not a relativizable path.
+      def relative_source(url, from_dir)
+        Pathname.new(url).relative_path_from(Pathname.new(from_dir)).to_s
+      rescue ArgumentError
+        url
+      end
 
       # Compile, downgrading a Sass/config error to a warning so a watcher does
       # not die on it (used at startup and on every recompile).

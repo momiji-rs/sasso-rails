@@ -62,4 +62,15 @@ class EngineTest < Minitest::Test
       assert_equal :compressed, Sasso::Rails.style_for(:compressed)
     end
   end
+
+  # Source maps default on outside production; an explicit setting always wins.
+  def test_source_map_default_is_env_based
+    ::Rails.stub(:env, ActiveSupport::StringInquirer.new("development")) do
+      assert_equal true, Sasso::Rails.source_map_for(nil)
+    end
+    ::Rails.stub(:env, ActiveSupport::StringInquirer.new("production")) do
+      assert_equal false, Sasso::Rails.source_map_for(nil)
+      assert_equal true, Sasso::Rails.source_map_for(true) # explicit override wins
+    end
+  end
 end

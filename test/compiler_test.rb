@@ -129,4 +129,50 @@ class CompilerTest < Minitest::Test
       assert_match(/Error/, err)
     end
   end
+
+  # --- source maps ---
+
+  def test_source_map_writes_sidecar_and_footer
+    with_app("application.scss" => ".a {\n  color: red;\n  .b { width: 10px; }\n}\n") do |root|
+      Sasso::Rails::Compiler.new(
+        root: root, builds: { "application.scss" => "application.css" }, source_map: true
+      ).build
+
+      css = read_build(root, "application.css")
+      assert_includes css, "/*# sourceMappingURL=application.css.map */"
+
+      map_path = File.join(root, "app/assets/builds/application.css.map")
+      assert File.file?(map_path), "expected a sidecar .map"
+      map = JSON.parse(File.read(map_path))
+      assert_equal 3, map["version"]
+      assert_equal "application.css", map["file"]
+      refute_empty map["mappings"]
+      # the source is rewritten relative to the builds dir (../stylesheets/...)
+      assert_includes map["sources"].first, "application.scss"
+    end
+  end
+
+  def test_no_source_map_by_default
+    with_app("application.scss" => ".a { color: red; }") do |root|
+      Sasso::Rails::Compiler.new(
+        root: root, builds: { "application.scss" => "application.css" }
+      ).build
+
+      refute_includes read_build(root, "application.css"), "sourceMappingURL"
+      refute File.exist?(File.join(root, "app/assets/builds/application.css.map"))
+    end
+  end
+
+  def test_compressed_source_map_footer_has_no_leading_blank_line
+    with_app("application.scss" => ".a { color: red; }") do |root|
+      Sasso::Rails::Compiler.new(
+        root: root, builds: { "application.scss" => "application.css" },
+        style: :compressed, source_map: true
+      ).build
+
+      css = read_build(root, "application.css")
+      # compressed: footer appended directly (no blank line before it)
+      assert_match(%r{\}/\*# sourceMappingURL=application\.css\.map \*/\n\z}, css)
+    end
+  end
 end

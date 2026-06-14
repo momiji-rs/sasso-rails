@@ -30,7 +30,8 @@ Gem::Specification.new do |spec|
   # Pure-Ruby integration: NO native extension here (the compiler lives in the
   # `sasso` gem). Hence no `spec.extensions`.
   spec.add_dependency "railties", ">= 7.0.0"
-  # The compiler engine gem. `>= 0.1.1` requires the compile(path) sibling-import
-  # fix; `< 1` allows the whole 0.x line (the tiny Ruby API surface is stable).
-  spec.add_dependency "sasso", ">= 0.1.1", "< 1"
+  # The compiler engine gem. `>= 0.2.0` requires its source-map API
+  # (`compile(source_map: true)`); `< 1` allows the rest of the 0.x line (the
+  # tiny Ruby API surface is stable).
+  spec.add_dependency "sasso", ">= 0.2.0", "< 1"
 end
