@@ -17,6 +17,28 @@ Why this gem over the alternatives:
   directly through the native extension — no process spawn, no IPC.
 - **Pure Rust core.** No libsass (deprecated), no Dart VM.
 
+## Compatibility
+
+- **Ruby** ≥ 3.1.
+- **Rails** ≥ 7.0 (`railties >= 7.0`), on **either** asset pipeline. Verified
+  end-to-end (`generate sasso:install` → `sasso:build` → production
+  `assets:precompile` → served CSS) on:
+
+  | Rails  | Asset pipeline                                       | Status              |
+  |--------|------------------------------------------------------|---------------------|
+  | 8.x    | Propshaft (the Rails 8 default)                      | ✅ primary path     |
+  | 7.1+   | Propshaft (`rails new --asset-pipeline=propshaft`)   | ✅                  |
+  | 7.0    | Sprockets (the Rails 7.0 default)                    | ✅ (since **0.1.3**) |
+
+  On **Propshaft** sasso compiles to `app/assets/builds/` and Propshaft serves
+  it (Propshaft performs no Sass step of its own). On **Sprockets** the installer
+  links that builds directory into the manifest **and** disables Sprockets' own
+  `.scss` handling, so `assets:precompile` deploys cleanly without `sassc`/
+  libsass (this last part is the 0.1.3 fix — earlier versions crashed
+  `assets:precompile` on a default Sprockets app; see the changelog). Either way
+  the compiler is the pure-Rust `sasso` native gem — no Node, no Dart, no
+  subprocess.
+
 ## Installation
 
 ```ruby
@@ -134,7 +156,7 @@ $ bundle lock --add-platform x86_64-linux aarch64-linux \
 ## Versioning
 
 This gem versions independently of the `sasso` compiler gem and pins it with a
-range (`sasso >= 0.1.1, < 1`). An app may pin a specific compiler version in its
+range (`sasso >= 0.2.0, < 1`). An app may pin a specific compiler version in its
 own `Gemfile`.
 
 ## License
