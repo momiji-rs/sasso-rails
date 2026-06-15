@@ -8,6 +8,21 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-06-15
+
+Requires the `sasso` gem **>= 0.2.3** (was `>= 0.2.0`).
+
+### Changed
+
+- Bumped the `sasso` engine-gem floor to **>= 0.2.3**, which pulls in two
+  dart-sass parity fixes contributed upstream by @shyim:
+  - **`!default` no longer evaluates its right-hand side when the variable is
+    already set.** This fixes a spurious "incompatible units" error seen in
+    Bootstrap-on-Shopware setups.
+  - **Legacy `rgb()`/`hsl()` preserve the caller's `rgba`/`hsla` spelling in
+    special-value passthroughs** (e.g. `rgba(var(--bs-body-color-rgb), …)`),
+    which Bootstrap relies on.
+
 ## [0.1.3] - 2026-06-14
 
 ### Fixed

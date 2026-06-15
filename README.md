@@ -156,7 +156,7 @@ $ bundle lock --add-platform x86_64-linux aarch64-linux \
 ## Versioning
 
 This gem versions independently of the `sasso` compiler gem and pins it with a
-range (`sasso >= 0.2.0, < 1`). An app may pin a specific compiler version in its
+range (`sasso >= 0.2.3, < 1`). An app may pin a specific compiler version in its
 own `Gemfile`.
 
 ## License
