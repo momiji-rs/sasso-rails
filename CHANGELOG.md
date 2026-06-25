@@ -8,6 +8,19 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-06-25
+
+Requires the `sasso` gem **>= 0.2.6** (was `>= 0.2.3`).
+
+### Changed
+
+- Bumped the `sasso` engine-gem floor to **>= 0.2.6**, which adopts core sasso
+  0.6.2: **compressed** output now emits the shortest equivalent legacy-color
+  form, matching dart-sass 1.101.0 byte-for-byte. A computed color such as
+  `darken(#336699, 10%)` compiles to `hsl(210,50%,30%)` instead of the longer
+  `rgb(38.25,76.5,114.75)`, and an integer-rgb-equivalent hsl literal
+  (`hsl(210, 50%, 40%)`) collapses to `#369`. Expanded output is unchanged.
+
 ## [0.1.4] - 2026-06-15
 
 Requires the `sasso` gem **>= 0.2.3** (was `>= 0.2.0`).
