@@ -40,7 +40,9 @@ class CompilerTest < Minitest::Test
       Sasso::Rails::Compiler.new(
         root: root, builds: { "application.scss" => "application.css" }, style: :compressed
       ).build
-      assert_equal ".a{width:10px}.a .b{height:2px}", read_build(root, "application.css")
+      # A built artifact ends with a single newline, like dart-sass's CLI
+      # (the library API omits it; the compiler re-adds it for both styles).
+      assert_equal ".a{width:10px}.a .b{height:2px}\n", read_build(root, "application.css")
     end
   end
 
