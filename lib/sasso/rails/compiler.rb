@@ -60,7 +60,10 @@ module Sasso
           write_source_map(dest, result.source_map)
           File.write(dest, result.css + source_map_footer(File.basename(dest)))
         else
-          File.write(dest, ::Sasso.compile(src, style: @style, load_paths: @load_paths))
+          # sasso >= 0.2.7's library API omits the trailing newline; a built CSS
+          # artifact conventionally ends with one (and dart-sass's CLI writes it),
+          # so append it here.
+          File.write(dest, "#{::Sasso.compile(src, style: @style, load_paths: @load_paths)}\n")
         end
         dest
       end
@@ -94,12 +97,13 @@ module Sasso
         File.write("#{dest}.map", JSON.generate(source_map))
       end
 
-      # The `sourceMappingURL` footer for the built CSS. Matches dart-sass: the
-      # expanded footer sits on its own line after the trailing newline; the
-      # compressed footer is appended directly (no leading newline).
+      # The `sourceMappingURL` footer for the built CSS. Matches dart-sass: since
+      # sasso >= 0.2.7's `result.css` has no trailing newline, the expanded
+      # footer supplies the line terminator AND dart's blank separator line
+      # (`\n\n`); the compressed footer is appended directly (no leading newline).
       def source_map_footer(css_basename)
         comment = "/*# sourceMappingURL=#{css_basename}.map */"
-        @style == :compressed ? "#{comment}\n" : "\n#{comment}\n"
+        @style == :compressed ? "#{comment}\n" : "\n\n#{comment}\n"
       end
 
       # A source URL made relative to the .map's directory (so a DevTools that

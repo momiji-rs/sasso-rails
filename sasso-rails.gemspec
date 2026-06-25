@@ -30,12 +30,14 @@ Gem::Specification.new do |spec|
   # Pure-Ruby integration: NO native extension here (the compiler lives in the
   # `sasso` gem). Hence no `spec.extensions`.
   spec.add_dependency "railties", ">= 7.0.0"
-  # The compiler engine gem. `>= 0.2.6` requires the source-map API
+  # The compiler engine gem. `>= 0.2.7` requires the source-map API
   # (`compile(source_map: true)`, since 0.2.0) plus the dart-sass parity fixes
-  # through 0.2.6: `!default` no longer evaluates an already-set RHS and legacy
-  # `rgb()`/`hsl()` preserve the caller's `rgba`/`hsla` spelling (0.2.3); and
+  # through 0.2.7: `!default` no longer evaluates an already-set RHS and legacy
+  # `rgb()`/`hsl()` preserve the caller's `rgba`/`hsla` spelling (0.2.3);
   # compressed output emits the shortest equivalent legacy-color form, e.g.
-  # `darken(#336699, 10%)` -> `hsl(210,50%,30%)` (0.2.6). `< 1` allows the rest
-  # of the 0.x line (the tiny Ruby API surface is stable).
-  spec.add_dependency "sasso", ">= 0.2.6", "< 1"
+  # `darken(#336699, 10%)` -> `hsl(210,50%,30%)` (0.2.6); and the library API
+  # omits the trailing newline (0.2.7), which the compiler re-adds when writing
+  # build artifacts. `< 1` allows the rest of the 0.x line (the tiny Ruby API
+  # surface is stable).
+  spec.add_dependency "sasso", ">= 0.2.7", "< 1"
 end

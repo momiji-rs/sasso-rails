@@ -8,6 +8,21 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-06-25
+
+Requires the `sasso` gem **>= 0.2.7** (was `>= 0.2.6`).
+
+### Changed
+
+- Bumped the `sasso` engine-gem floor to **>= 0.2.7**, whose library API now
+  omits the trailing newline (adopting core sasso 0.6.3, byte-for-byte dart-sass
+  parity). The compiler re-adds the conventional trailing newline when writing a
+  build artifact, matching dart-sass's CLI for **both** styles:
+  - **Expanded** builds are unchanged (`…}\n`), and source-mapped expanded
+    builds keep dart's blank line before the `sourceMappingURL` footer.
+  - **Compressed** builds now end with a single newline (`…}\n`) too — they
+    previously had none, a one-byte deviation from dart-sass's CLI.
+
 ## [0.1.5] - 2026-06-25
 
 Requires the `sasso` gem **>= 0.2.6** (was `>= 0.2.3`).
