@@ -12,7 +12,10 @@ Gem::Specification.new do |spec|
                      "sasso native extension — no Node.js, no subprocess."
   spec.homepage = "https://github.com/momiji-rs/sasso-rails"
   spec.license  = "MIT"
-  spec.required_ruby_version = ">= 3.1.0"
+  # Follows the `sasso` engine gem, which dropped Ruby 3.1 in 0.14.0 (3.1 left
+  # security maintenance in March 2025). A 3.1 install could not resolve the
+  # dependency below in any case.
+  spec.required_ruby_version = ">= 3.2.0"
 
   spec.metadata["homepage_uri"]    = spec.homepage
   spec.metadata["source_code_uri"] = spec.homepage
@@ -30,14 +33,12 @@ Gem::Specification.new do |spec|
   # Pure-Ruby integration: NO native extension here (the compiler lives in the
   # `sasso` gem). Hence no `spec.extensions`.
   spec.add_dependency "railties", ">= 7.0.0"
-  # The compiler engine gem. `>= 0.2.7` requires the source-map API
-  # (`compile(source_map: true)`, since 0.2.0) plus the dart-sass parity fixes
-  # through 0.2.7: `!default` no longer evaluates an already-set RHS and legacy
-  # `rgb()`/`hsl()` preserve the caller's `rgba`/`hsla` spelling (0.2.3);
-  # compressed output emits the shortest equivalent legacy-color form, e.g.
-  # `darken(#336699, 10%)` -> `hsl(210,50%,30%)` (0.2.6); and the library API
-  # omits the trailing newline (0.2.7), which the compiler re-adds when writing
-  # build artifacts. `< 1` allows the rest of the 0.x line (the tiny Ruby API
-  # surface is stable).
-  spec.add_dependency "sasso", ">= 0.2.7", "< 1"
+  # The compiler engine gem. From `sasso` 0.14.0 its version tracks the core
+  # compiler crate it bundles, so this floor also names the compiler: 0.14.0
+  # carries core 0.14.0 (dart-sass 1.104.1 parity), where 0.2.7 carried core
+  # 0.6.3 (1.101.0). The floor is what guarantees the source-map API
+  # (`compile(source_map: true)`, since 0.2.0) and the trailing-newline
+  # behaviour this gem's writer depends on (0.2.7). `< 1` allows the rest of the
+  # 0.x line — the Ruby API surface this gem uses is a two-method one.
+  spec.add_dependency "sasso", ">= 0.14.0", "< 1"
 end

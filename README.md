@@ -19,7 +19,7 @@ Why this gem over the alternatives:
 
 ## Compatibility
 
-- **Ruby** ≥ 3.1.
+- **Ruby** ≥ 3.2 (the `sasso` engine gem dropped 3.1 in 0.14.0).
 - **Rails** ≥ 7.0 (`railties >= 7.0`), on **either** asset pipeline. Verified
   end-to-end (`generate sasso:install` → `sasso:build` → production
   `assets:precompile` → served CSS) on:
