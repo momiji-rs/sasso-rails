@@ -28,19 +28,22 @@ Requires the `sasso` gem **>= 0.14.0** (was `>= 0.2.7`), and **Ruby >= 3.2**.
 - **Your built CSS will change, and so will its digest.** The compiler's output
   moved with the core, so a Propshaft/Sprockets fingerprint computed over a
   stylesheet's bytes changes on the next `assets:precompile` even when the
-  stylesheet did not — expect one cache-busting round of new asset URLs. The CSS
-  is equivalent; only its spelling changed. The engine gem's
+  stylesheet did not — expect one cache-busting round of new asset URLs. The
+  engine gem's
   [CHANGELOG](https://github.com/momiji-rs/sasso-ruby/blob/main/CHANGELOG.md)
   lists every change; the ones most likely to show up in a Rails app:
-  - A legacy color with a fractional channel writes its rgb triple as
-    percentages, and compressed `hsl`/`hwb` route through `rgb` — so
-    `darken(#336699, 10%)` compresses to `rgb(15%,30%,45%)`, not
-    `hsl(210,50%,30%)`.
-  - Global `whiteness()` / `blackness()` are **no longer built-ins** and now pass
-    through as plain CSS (`whiteness(#f00)` instead of `0%`), matching dart-sass.
-    This one is silent — no error, no warning — so grep for it.
-  - Source-map `mappings` change: a declaration whose value is a bare `$name` now
-    maps back to the variable's definition.
+  - **Serialization only** — the CSS means the same thing, it is spelled
+    differently. A legacy color with a fractional channel writes its rgb triple
+    as percentages, and compressed `hsl`/`hwb` route through `rgb`, so
+    `darken(#336699, 10%)` compresses to `rgb(15%,30%,45%)` rather than
+    `hsl(210,50%,30%)`. Source-map `mappings` also change: a declaration whose
+    value is a bare `$name` now maps back to the variable's definition.
+  - **Not serialization only** — global `whiteness()` / `blackness()` are no
+    longer built-ins and now pass through as plain CSS, matching dart-sass. This
+    one changes what the browser does: `whiteness(#f00)` used to compile to `0%`,
+    and now emits an unknown CSS function, which makes the declaration invalid
+    and the browser drop it. It is also silent — no error, no warning — so it is
+    the one to grep for. Use `color.whiteness()` via `@use "sass:color"`.
 - No change to this gem's own API, generators, or rake tasks. Verified green
   against `sasso` 0.14.0 (23 runs, 70 assertions).
 
