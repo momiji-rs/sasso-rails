@@ -8,6 +8,45 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-09-17
+
+Requires the `sasso` gem **>= 0.14.0** (was `>= 0.2.7`), and **Ruby >= 3.2**.
+
+### Removed
+
+- **Ruby 3.1 support** (`required_ruby_version` is now `>= 3.2.0`), following the
+  `sasso` engine gem, which dropped it in 0.14.0. CI had already stopped testing
+  3.1 because the current Rails dep tree does not resolve there; now no dep set
+  does.
+
+### Changed
+
+- Bumped the `sasso` engine-gem floor to **>= 0.14.0**. From that release the
+  engine gem's version tracks the compiler crate it bundles, so the floor names
+  the compiler too: core 0.14.0, at **dart-sass 1.104.1** parity, where 0.2.7
+  carried core 0.6.3 (1.101.0).
+- **Your built CSS will change, and so will its digest.** The compiler's output
+  moved with the core, so a Propshaft/Sprockets fingerprint computed over a
+  stylesheet's bytes changes on the next `assets:precompile` even when the
+  stylesheet did not — expect one cache-busting round of new asset URLs. The
+  engine gem's
+  [CHANGELOG](https://github.com/momiji-rs/sasso-ruby/blob/main/CHANGELOG.md)
+  lists every change; the ones most likely to show up in a Rails app:
+  - **Serialization only** — the CSS means the same thing, it is spelled
+    differently. A legacy color with a fractional channel writes its rgb triple
+    as percentages, and compressed `hsl`/`hwb` route through `rgb`, so
+    `darken(#336699, 10%)` compresses to `rgb(15%,30%,45%)` rather than
+    `hsl(210,50%,30%)`. Source-map `mappings` also change: a declaration whose
+    value is a bare `$name` now maps back to the variable's definition.
+  - **Not serialization only** — global `whiteness()` / `blackness()` are no
+    longer built-ins and now pass through as plain CSS, matching dart-sass. This
+    one changes what the browser does: `whiteness(#f00)` used to compile to `0%`,
+    and now emits an unknown CSS function, which makes the declaration invalid
+    and the browser drop it. It is also silent — no error, no warning — so it is
+    the one to grep for. Use `color.whiteness()` via `@use "sass:color"`.
+- No change to this gem's own API, generators, or rake tasks. Verified green
+  against `sasso` 0.14.0 (23 runs, 70 assertions).
+
 ## [0.1.6] - 2026-06-25
 
 Requires the `sasso` gem **>= 0.2.7** (was `>= 0.2.6`).

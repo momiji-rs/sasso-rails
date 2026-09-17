@@ -16,11 +16,10 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest]
-        # Ruby 3.1 is dropped from CI: the latest Rails 7.2 dep tree resolves to
-        # nokogiri >= 1.19 (via railties -> actionpack), which requires Ruby >=
-        # 3.2, so `bundle install` against current deps no longer resolves on 3.1.
-        # The gem itself still works on 3.1 with a 3.1-compatible dep set (older
-        # Rails / nokogiri < 1.19); see required_ruby_version in the gemspec.
+        # Ruby 3.1 is unsupported, not merely untested: the `sasso` engine gem
+        # requires >= 3.2 as of 0.14.0, so no dep set resolves on 3.1. (The
+        # current Rails dep tree independently pulls nokogiri >= 1.19, which
+        # wants >= 3.2 too.) See required_ruby_version in the gemspec.
         ruby: ["3.2", "3.3", "3.4"]
     steps:
       - uses: actions/checkout@v6
