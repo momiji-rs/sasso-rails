@@ -20,7 +20,10 @@ jobs:
         # requires >= 3.2 as of 0.14.0, so no dep set resolves on 3.1. (The
         # current Rails dep tree independently pulls nokogiri >= 1.19, which
         # wants >= 3.2 too.) See required_ruby_version in the gemspec.
-        ruby: ["3.2", "3.3", "3.4"]
+        # Ruby 4.0 needs `sasso` >= 0.14.1, the first release with a precompiled
+        # 4.0 binary (0.14.0's source gem does not build on 4.0); bundler resolves
+        # a newer one here regardless of the gemspec floor.
+        ruby: ["3.2", "3.3", "3.4", "4.0"]
     steps:
       - uses: actions/checkout@v6
       - uses: ruby/setup-ruby@v1
