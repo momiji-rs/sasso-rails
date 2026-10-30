@@ -8,6 +8,40 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
+Still requires the `sasso` gem **>= 0.14.0**; works with **0.21.0**, which a
+fresh `bundle install` or `bundle update sasso` now resolves.
+
+### Added
+
+- **Ruby 4.0** in CI. It needs `sasso` **>= 0.14.1**, the first engine-gem
+  release with a precompiled 4.0 binary (0.14.0's source gem does not build on
+  4.0); Bundler picks one automatically unless your app pins `sasso` 0.14.0.
+
+### Changed
+
+- **Upgrading to `sasso` 0.21.0 can break `sasso:build`.** It adopts core 0.15.0
+  through 0.21.0, and some stylesheets that compiled under 0.14.0 now raise
+  `Sasso::CompileError` — and so fail `assets:precompile` on deploy. The likely
+  ones in a Rails app: a built-in called with an argument name it does not
+  declare (`math.max(1, 2, $x: 999)`), an argument passed both by position and
+  by name, and selectors that dart-sass's grammar rejects (`[a=1]`, `a^b`). Some
+  output also changes meaning, not only bytes (compressed `color()`, a quoted
+  attribute value's whitespace, a non-ASCII space in a selector), and asset
+  digests change once again. Run `bin/rails sasso:build` after the upgrade, and
+  read the engine gem's
+  [CHANGELOG](https://github.com/momiji-rs/sasso-ruby/blob/main/CHANGELOG.md)
+  (section `0.21.0`) for the full list. Pin `gem "sasso", "~> 0.14.0"` in your
+  Gemfile to stay on the old compiler while you fix stylesheets.
+- **A new `bogus-combinators` deprecation warning** may appear in `sasso:build`
+  / `sasso:watch` output, for a rule whose selector has a repeated or leading
+  combinator (`a > + b`). The compiler already dropped those rules silently; the
+  warning is the only sign the CSS lost them. This gem does not expose
+  `silence_deprecations:`, so fix the selector to clear it.
+- The `sasso` floor stays at **>= 0.14.0**: this gem uses none of 0.21.0's new
+  options, and raising it would force the breakage above onto apps that pinned
+  the older compiler. No change to this gem's own API, generators, or rake
+  tasks. Verified green against `sasso` 0.21.0 (23 runs, 70 assertions).
+
 ## [0.1.7] - 2026-09-17
 
 Requires the `sasso` gem **>= 0.14.0** (was `>= 0.2.7`), and **Ruby >= 3.2**.

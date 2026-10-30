@@ -40,5 +40,10 @@ Gem::Specification.new do |spec|
   # (`compile(source_map: true)`, since 0.2.0) and the trailing-newline
   # behaviour this gem's writer depends on (0.2.7). `< 1` allows the rest of the
   # 0.x line — the Ruby API surface this gem uses is a two-method one.
+  #
+  # Deliberately NOT raised to 0.21.0: this gem passes none of the options that
+  # release added (`silence_deprecations:`), and core 0.21.0 rejects some
+  # stylesheets 0.14.0 compiled, so a floor bump would only force that breakage
+  # on apps that pinned the older compiler. Fresh installs resolve 0.21.0 anyway.
   spec.add_dependency "sasso", ">= 0.14.0", "< 1"
 end

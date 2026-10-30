@@ -19,7 +19,9 @@ Why this gem over the alternatives:
 
 ## Compatibility
 
-- **Ruby** ≥ 3.2 (the `sasso` engine gem dropped 3.1 in 0.14.0).
+- **Ruby** ≥ 3.2 (the `sasso` engine gem dropped 3.1 in 0.14.0), tested on
+  3.2–4.0. Ruby 4.0 needs `sasso` ≥ 0.14.1, the first release with a 4.0
+  binary; Bundler resolves one unless your app pins 0.14.0.
 - **Rails** ≥ 7.0 (`railties >= 7.0`), on **either** asset pipeline. Verified
   end-to-end (`generate sasso:install` → `sasso:build` → production
   `assets:precompile` → served CSS) on:
@@ -161,6 +163,13 @@ compiler. See the [gemspec](sasso-rails.gemspec) for the current range and the
 [CHANGELOG](CHANGELOG.md) for which release moved it; `Sasso::CORE_VERSION`
 reports the compiler your app actually has installed. An app may pin a specific
 compiler version in its own `Gemfile`.
+
+A compiler upgrade within the range is not always a drop-in. **`sasso` 0.21.0
+rejects some stylesheets that 0.14.x compiled** (stricter built-in argument
+checking and selector grammar) and changes some output, so run
+`bin/rails sasso:build` after `bundle update sasso`, and read the engine gem's
+[CHANGELOG](https://github.com/momiji-rs/sasso-ruby/blob/main/CHANGELOG.md)
+before deploying. `gem "sasso", "~> 0.14.0"` keeps the older compiler.
 
 ## License
 
