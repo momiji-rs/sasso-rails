@@ -8,7 +8,9 @@ the engine-gem version range it requires.
 
 ## [Unreleased]
 
-Still requires the `sasso` gem **>= 0.14.0**; works with **0.21.0**, which a
+## [0.1.8] - 2026-10-30
+
+Requires the `sasso` gem **>= 0.14.0** (unchanged); works with **0.21.0**, which a
 fresh `bundle install` or `bundle update sasso` now resolves.
 
 ### Added
