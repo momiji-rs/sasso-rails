@@ -8,6 +8,6 @@ module Sasso
     # the gemspec and is deliberately not restated here — this comment claimed
     # `>= 0.1.1` through two floor bumps. `Sasso::CORE_VERSION` reports the
     # compiler actually installed.
-    VERSION = "0.1.7"
+    VERSION = "0.1.8"
   end
 end
